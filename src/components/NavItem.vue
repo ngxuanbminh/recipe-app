@@ -52,7 +52,7 @@ const activeStateClasses = computed(() => {
     ]"
   >
     <i :class="['pi', `pi-${icon}`, 'text-xl']" aria-hidden="true" />
-    <span v-if="!truncated" class="whitespace-nowrap text-base font-medium">
+    <span v-if="!truncated" class="whitespace-nowrap label-medium">
       {{ label }}
     </span>
   </button>

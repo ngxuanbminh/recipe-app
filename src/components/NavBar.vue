@@ -22,26 +22,35 @@ const setActiveItem = (item) => {
 
 <template>
   <aside 
-    class="flex flex-col bg-[var(--color-primary)] h-full border-r border-[var(--color-tertiary)]" 
+    class="flex flex-col bg-[var(--color-primary)] h-full border-r border-[var(--color-tertiary)] transition-all duration-300 linear overflow-hidden px-3" 
     :class="truncated ? 'w-[72px]' : 'w-[225px]'"
   >
     <!-- NavBar Header -->
     <div :class="[
-      'flex items-center py-3 px-2 border-b border-[var(--color-tertiary)]',
-      truncated ? 'justify-center' : 'justify-between'
+      'flex items-center py-3 transition-all duration-300 w-full',
+      truncated ? 'justify-start' : 'justify-between'
     ]">
       <IconButton 
         :icon="truncated ? 'angle-double-right' : 'angle-double-left'" 
         @click="$emit('toggle')" 
+        class="transition-transform duration-300"
       />
-      <IconButton icon="search" v-if="!truncated" />
-      <IconButton icon="plus" v-if="!truncated" />
+      <IconButton 
+        icon="search" 
+        v-if="!truncated" 
+        class="transition-opacity duration-300" 
+      />
+      <IconButton 
+        icon="plus" 
+        v-if="!truncated" 
+        class="transition-opacity duration-300" 
+      />
     </div>
 
     <!-- NavBar Items -->
     <nav :class="[
-      'flex-1 flex flex-col gap-4 py-4',
-      truncated ? 'items-center px-0' : 'px-2'
+      'flex-1 flex flex-col gap-4 py-4 transition-all duration-300 w-full',
+      truncated ? 'items-center' : ''
     ]">
       <NavItem 
         icon="star" 
@@ -49,6 +58,7 @@ const setActiveItem = (item) => {
         :active="activeItem === 'smart-recommend'"
         :truncated="truncated"
         @click="setActiveItem('smart-recommend')"
+        class="transition-all duration-300"
       />
       <NavItem 
         icon="file" 
@@ -56,6 +66,7 @@ const setActiveItem = (item) => {
         :active="activeItem === 'recipe'"
         :truncated="truncated"
         @click="setActiveItem('recipe')"
+        class="transition-all duration-300"
       />
       <NavItem 
         icon="shopping-cart" 
@@ -63,6 +74,7 @@ const setActiveItem = (item) => {
         :active="activeItem === 'groceries'"
         :truncated="truncated"
         @click="setActiveItem('groceries')"
+        class="transition-all duration-300"
       />
       <NavItem 
         icon="calendar" 
@@ -70,13 +82,13 @@ const setActiveItem = (item) => {
         :active="activeItem === 'meal-plan'"
         :truncated="truncated"
         @click="setActiveItem('meal-plan')"
+        class="transition-all duration-300"
       />
     </nav>
 
     <!-- NavBar Footer -->
     <div :class="[
-      'flex items-center py-3 px-2 border-t border-[var(--color-tertiary)]',
-      truncated ? 'justify-center' : 'justify-start'
+      'flex items-center justify-start py-3 transition-all duration-300 w-full',
     ]">
       <IconButton icon="cog" />
     </div>
