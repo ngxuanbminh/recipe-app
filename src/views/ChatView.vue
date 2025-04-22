@@ -1,0 +1,1 @@
+<template><h1>What do you want to cook today?</h1></template>

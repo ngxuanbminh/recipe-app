@@ -1,5 +1,6 @@
 <script setup>
-import { ref } from 'vue';
+import { computed } from 'vue';
+import { RouterLink, useRoute } from 'vue-router';
 import IconButton from './IconButton.vue';
 import NavItem from './NavItem.vue';
 
@@ -13,11 +14,19 @@ defineProps({
 
 defineEmits(['toggle']);
 
-const activeItem = ref('smart-recommend');
+// Use the route to determine which item is active
+const route = useRoute();
 
-const setActiveItem = (item) => {
-  activeItem.value = item;
-};
+// Determine which nav item is active based on current route
+const activeItem = computed(() => {
+  const path = route.path;
+  if (path === '/') return 'smart-recommend';
+  if (path.startsWith('/recipe')) return 'recipe';
+  if (path.startsWith('/groceries')) return 'groceries';
+  if (path.startsWith('/meal-plan')) return 'meal-plan';
+  if (path.startsWith('/chat')) return 'chat';
+  return '';
+});
 </script>
 
 <template>
@@ -52,38 +61,49 @@ const setActiveItem = (item) => {
       'flex-1 flex flex-col gap-4 py-4 transition-all duration-300 w-full',
       truncated ? 'items-center' : ''
     ]">
-      <NavItem 
-        icon="star" 
-        label="Smart Recommend" 
-        :active="activeItem === 'smart-recommend'"
-        :truncated="truncated"
-        @click="setActiveItem('smart-recommend')"
-        class="transition-all duration-300"
-      />
-      <NavItem 
-        icon="file" 
-        label="Recipe" 
-        :active="activeItem === 'recipe'"
-        :truncated="truncated"
-        @click="setActiveItem('recipe')"
-        class="transition-all duration-300"
-      />
-      <NavItem 
-        icon="shopping-cart" 
-        label="Groceries" 
-        :active="activeItem === 'groceries'"
-        :truncated="truncated"
-        @click="setActiveItem('groceries')"
-        class="transition-all duration-300"
-      />
-      <NavItem 
-        icon="calendar" 
-        label="Meal Plan" 
-        :active="activeItem === 'meal-plan'"
-        :truncated="truncated"
-        @click="setActiveItem('meal-plan')"
-        class="transition-all duration-300"
-      />
+      <RouterLink to="/chat" custom v-slot="{ navigate }">
+        <NavItem 
+          icon="comments" 
+          label="Chat" 
+          :active="activeItem === 'chat'"
+          :truncated="truncated"
+          @click="navigate"
+          class="transition-all duration-300"
+        />
+      </RouterLink>
+      
+      <RouterLink to="/recipe" custom v-slot="{ navigate }">
+        <NavItem 
+          icon="file" 
+          label="Recipe" 
+          :active="activeItem === 'recipe'"
+          :truncated="truncated"
+          @click="navigate"
+          class="transition-all duration-300"
+        />
+      </RouterLink>
+      
+      <RouterLink to="/groceries" custom v-slot="{ navigate }">
+        <NavItem 
+          icon="shopping-cart" 
+          label="Groceries" 
+          :active="activeItem === 'groceries'"
+          :truncated="truncated"
+          @click="navigate"
+          class="transition-all duration-300"
+        />
+      </RouterLink>
+      
+      <RouterLink to="/meal-plan" custom v-slot="{ navigate }">
+        <NavItem 
+          icon="calendar" 
+          label="Meal Plan" 
+          :active="activeItem === 'meal-plan'"
+          :truncated="truncated"
+          @click="navigate"
+          class="transition-all duration-300"
+        />
+      </RouterLink>
     </nav>
 
     <!-- NavBar Footer -->
