@@ -1,1 +1,18 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+:root {
+  --color-primary: #FEF7FF;  /* Your color-60 */
+  --color-secondary: #FFFFFF; /* Your color-30 */
+  --color-tertiary: #E8DEF8;  /* Your color-10 */
+  --color-tertiary-hover: #F3EFFB;  /* Tertiary color when hovered */
+  --font-family: 'Roboto', sans-serif;
+}
+
+/* Apply font family globally */
+body {
+  font-family: var(--font-family);
+}
+
+/* Add any other global styles here */
+
