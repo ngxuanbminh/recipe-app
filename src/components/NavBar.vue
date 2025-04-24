@@ -1,8 +1,9 @@
 <script setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { RouterLink, useRoute } from 'vue-router';
 import IconButton from './IconButton.vue';
 import NavItem from './NavItem.vue';
+import SettingsPopup from './SettingsPopup.vue';
 
 defineProps({
   /** Whether the navbar is in truncated mode */
@@ -16,6 +17,14 @@ defineEmits(['toggle']);
 
 // Use the route to determine which item is active
 const route = useRoute();
+
+// State to control the visibility of the settings popup
+const showSettingsPopup = ref(false);
+
+// Toggle settings popup visibility
+const toggleSettingsPopup = () => {
+  showSettingsPopup.value = !showSettingsPopup.value;
+};
 
 // Determine which nav item is active based on current route
 const activeItem = computed(() => {
@@ -110,7 +119,13 @@ const activeItem = computed(() => {
     <div :class="[
       'flex items-center justify-start py-3 transition-all duration-300 w-full',
     ]">
-      <IconButton icon="cog" />
+      <IconButton icon="cog" @click="toggleSettingsPopup" />
     </div>
   </aside>
+
+  <!-- Settings Popup Component -->
+  <SettingsPopup 
+    :isVisible="showSettingsPopup" 
+    @close="showSettingsPopup = false" 
+  />
 </template>
