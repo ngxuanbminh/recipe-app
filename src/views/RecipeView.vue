@@ -53,8 +53,9 @@ onMounted(async () => {
     myRecipes.value = Array.isArray(myRecipesResponse.data) ? myRecipesResponse.data : (myRecipesResponse.data['my-recipes'] || []);
 
     // Future database recipes implementation
-    // const { data: database } = await axios.get('/api/database');
-    // databaseRecipes.value = database;
+    const { data: database } = await axios.get('/api/database');
+    databaseRecipes.value = database;
+
   } catch (error) {
     console.error('Error fetching recipes:', error);
   } finally {
@@ -162,9 +163,9 @@ onMounted(async () => {
           />
           
           <!-- Show More Button (only if more than 6 recipes) -->
-          <div v-if="showMoreDatabaseRecipes" class="flex items-center justify-center w-20 h-[150px] flex-shrink-0">
+          <div class="flex items-center justify-center w-20 h-[150px] flex-shrink-0">
             <button class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]">
-              <i class="pi pi-arrow-right text-xl text-gray-600"></i>
+              <i class="pi pi-search text-xl text-gray-600"></i>
             </button>
           </div>
         </div>
