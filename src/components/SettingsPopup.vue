@@ -22,8 +22,8 @@ defineEmits(['close']);
       
       <div class="p-4 border-b border-gray-200">
         <h3 class="mt-0 mb-3 text-base font-medium">Account</h3>
-        <button class="block w-full py-2 px-4 mb-2 bg-[var(--color-primary)] text-white border-none rounded cursor-pointer text-sm hover:bg-[var(--color-secondary)]">Log in</button>
-        <button class="block w-full py-2 px-4 mb-2 bg-[var(--color-primary)] text-white border-none rounded cursor-pointer text-sm hover:bg-[var(--color-secondary)]">Create account</button>
+        <button class="block w-full py-2 px-4 mb-2 bg-[var(--color-tertiary)] text-black border-none rounded cursor-pointer text-sm hover:bg-[var(--color-tertiary-hover)]">Log in</button>
+        <button class="block w-full py-2 px-4 mb-2 bg-[var(--color-tertiary)] text-black border-none rounded cursor-pointer text-sm hover:bg-[var(--color-tertiary-hover)]">Create account</button>
       </div>
       
       

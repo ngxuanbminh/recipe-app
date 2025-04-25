@@ -13,8 +13,6 @@ const toggleNavBar = () => {
 <template>
   <div class="flex h-screen">
     <NavBar :truncated="truncated" @toggle="toggleNavBar" />
-    <main class="flex-1 p-4">
-      <RouterView />
-    </main>
+    <RouterView/>
   </div>
 </template>

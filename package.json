@@ -7,14 +7,20 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "format": "prettier --write src/"
+    "format": "prettier --write src/",
+    "server-my-recipes": "json-server --watch src/my-recipes.json --port 4000",
+    "server-fav-recipes": "json-server --watch src/fav-recipes.json --port 4001",
+    "start-servers": "concurrently \"npm run server-my-recipes\" \"npm run server-fav-recipes\""
   },
   "dependencies": {
     "@tailwindcss/postcss": "^4.1.4",
     "@tailwindcss/vite": "^4.1.4",
+    "axios": "^1.9.0",
+    "json-server": "^1.0.0-beta.3",
     "primeicons": "^7.0.0",
     "vue": "^3.5.13",
-    "vue-router": "^4.5.0"
+    "vue-router": "^4.5.0",
+    "vue-spinner": "^1.0.4"
   },
   "devDependencies": {
     "@eslint/css": "^0.7.0",
@@ -23,6 +29,7 @@
     "@eslint/markdown": "^6.4.0",
     "@vitejs/plugin-vue": "^5.2.3",
     "autoprefixer": "^10.4.21",
+    "concurrently": "^9.1.2",
     "eslint": "^9.25.0",
     "eslint-plugin-vue": "^10.0.0",
     "globals": "^16.0.0",
