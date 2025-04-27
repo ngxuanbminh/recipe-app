@@ -1,67 +1,70 @@
 <script setup>
-import RecipeCard from '@/components/RecipeCard.vue';
-import { ref, computed, onMounted } from 'vue';
-import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
-import favRecipesApi from '@/services/favRecipesApi';
-import myRecipesApi from '@/services/myRecipesApi';
-import axios from 'axios';
+import RecipeCard from '@/components/RecipeCard.vue'
+import { ref, computed, onMounted } from 'vue'
+import PulseLoader from 'vue-spinner/src/PulseLoader.vue'
+import favRecipesApi from '@/services/favRecipesApi'
+import myRecipesApi from '@/services/myRecipesApi'
+import axios from 'axios'
 
 // Accept navbar truncated state from parent
 defineProps({
   navbarTruncated: {
     type: Boolean,
-    default: false
-  }
-});
+    default: false,
+  },
+})
 
 // Empty arrays for recipe data
-const favoriteRecipes = ref([]);
-const myRecipes = ref([]);
-const databaseRecipes = ref([]);
-const isLoading = ref(false);
+const favoriteRecipes = ref([])
+const myRecipes = ref([])
+const databaseRecipes = ref([])
+const isLoading = ref(false)
 
 // Compute whether to show "Show More" buttons
-const showMoreFavorites = computed(() => favoriteRecipes.value.length > 6);
-const showMoreMyRecipes = computed(() => myRecipes.value.length > 6);
+const showMoreFavorites = computed(() => favoriteRecipes.value.length > 6)
+const showMoreMyRecipes = computed(() => myRecipes.value.length > 6)
 
 // Limit visible recipes to 6
-const visibleFavorites = computed(() => favoriteRecipes.value.slice(0, 6));
-const visibleMyRecipes = computed(() => myRecipes.value.slice(0, 6));
-
-// Add computed property for visible database recipes
-const visibleDatabaseRecipes = computed(() => databaseRecipes.value.slice(0, 6));
-const showMoreDatabaseRecipes = computed(() => databaseRecipes.value.length > 6);
+const visibleFavorites = computed(() => favoriteRecipes.value.slice(0, 6))
+const visibleMyRecipes = computed(() => myRecipes.value.slice(0, 6))
 
 onMounted(async () => {
   try {
-    isLoading.value = true;
-     
+    isLoading.value = true
+
     // Fetch recipes from both sources simultaneously
     const [favResponse, myRecipesResponse] = await Promise.all([
       favRecipesApi.getAllFavorites(),
-      myRecipesApi.getAllRecipes() 
-    ]);
-    
-    console.log('API Responses:', { 
-      favResponse: favResponse.data, 
-      myRecipesResponse: myRecipesResponse.data 
-    });
-    
+      myRecipesApi.getAllRecipes(),
+    ])
+
+    console.log('API Responses:', {
+      favResponse: favResponse.data,
+      myRecipesResponse: myRecipesResponse.data,
+    })
+
     // JSON-Server returns data directly, not nested under property names
-    // The data structure depends on how json-server reads your JSON files
-    favoriteRecipes.value = Array.isArray(favResponse.data) ? favResponse.data : (favResponse.data['fav-recipes'] || []);
-    myRecipes.value = Array.isArray(myRecipesResponse.data) ? myRecipesResponse.data : (myRecipesResponse.data['my-recipes'] || []);
+    favoriteRecipes.value = Array.isArray(favResponse.data)
+      ? favResponse.data
+      : favResponse.data['fav-recipes'] || []
+    myRecipes.value = Array.isArray(myRecipesResponse.data)
+      ? myRecipesResponse.data
+      : myRecipesResponse.data['my-recipes'] || []
 
-    // Future database recipes implementation
-    const { data: database } = await axios.get('/api/database');
-    databaseRecipes.value = database;
-
+    const response = await axios.get('api/recipes/random', {
+      params: {
+        apiKey: import.meta.env.VITE_SPOONACULAR_API_KEY,
+        number: 6,
+      },
+    })
+    databaseRecipes.value = response.data.recipes
+    console.log('Database Recipes:', databaseRecipes.value)
   } catch (error) {
-    console.error('Error fetching recipes:', error);
+    console.error('Error fetching recipes:', error)
   } finally {
-    isLoading.value = false;
+    isLoading.value = false
   }
-});
+})
 </script>
 
 <template>
@@ -74,13 +77,15 @@ onMounted(async () => {
           <i class="pi pi-star text-xl"></i>
           <h2 class="headline-small m-0">Favorite</h2>
         </div>
-        
+
         <!-- Show loading spinner while loading is true -->
         <div v-if="isLoading" class="flex items-center justify-center h-[150px]">
           <PulseLoader :loading="isLoading" color="#4f46e5" size="15" />
         </div>
-        
-        <div class="flex flex-nowrap gap-4 overflow-x-auto pb-2 w-full scroll-smooth touch-pan-x scrollbar-hide">
+
+        <div
+          class="flex flex-nowrap gap-4 overflow-x-auto pb-2 w-full scroll-smooth touch-pan-x scrollbar-hide"
+        >
           <!-- Recipe Cards (when available) -->
           <RecipeCard
             v-for="recipe in visibleFavorites"
@@ -89,21 +94,28 @@ onMounted(async () => {
             :image="recipe.image"
             class="flex-none w-[200px] h-[150px]"
           />
-          
+
           <!-- Add Recipe Button -->
-          <div class="flex-none w-[200px] h-[150px] flex items-center justify-center bg-[var(--color-tertiary)] rounded-xl cursor-pointer hover:bg-[var(--color-tertiary-hover)]">
+          <div
+            class="flex-none w-[200px] h-[150px] flex items-center justify-center bg-[var(--color-tertiary)] rounded-xl cursor-pointer hover:bg-[var(--color-tertiary-hover)]"
+          >
             <i class="pi pi-plus text-2xl text-gray-400"></i>
           </div>
-          
+
           <!-- Show More Button (only if more than 6 recipes) -->
-          <div v-if="showMoreFavorites" class="flex items-center justify-center w-20 h-[150px] flex-shrink-0">
-            <button class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]">
+          <div
+            v-if="showMoreFavorites"
+            class="flex items-center justify-center w-20 h-[150px] flex-shrink-0"
+          >
+            <button
+              class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]"
+            >
               <i class="pi pi-arrow-right text-xl text-gray-600"></i>
             </button>
           </div>
         </div>
       </div>
-      
+
       <!-- My Recipes Section -->
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-4">
@@ -115,8 +127,10 @@ onMounted(async () => {
         <div v-if="isLoading" class="flex items-center justify-center h-[150px]">
           <PulseLoader :loading="isLoading" color="#4f46e5" size="15" />
         </div>
-        
-        <div class="flex flex-nowrap gap-4 overflow-x-auto pb-2 w-full scroll-smooth touch-pan-x scrollbar-hide">
+
+        <div
+          class="flex flex-nowrap gap-4 overflow-x-auto pb-2 w-full scroll-smooth touch-pan-x scrollbar-hide"
+        >
           <!-- Recipe Cards (when available) -->
           <RecipeCard
             v-for="recipe in visibleMyRecipes"
@@ -125,21 +139,28 @@ onMounted(async () => {
             :image="recipe.image"
             class="flex-none w-[200px] h-[150px]"
           />
-          
+
           <!-- Add Recipe Button -->
-          <div class="flex-none w-[200px] h-[150px] flex items-center justify-center bg-[var(--color-tertiary)] rounded-xl cursor-pointer hover:bg-[var(--color-tertiary-hover)]">
+          <div
+            class="flex-none w-[200px] h-[150px] flex items-center justify-center bg-[var(--color-tertiary)] rounded-xl cursor-pointer hover:bg-[var(--color-tertiary-hover)]"
+          >
             <i class="pi pi-plus text-2xl text-gray-400"></i>
           </div>
-          
+
           <!-- Show More Button (only if more than 6 recipes) -->
-          <div v-if="showMoreMyRecipes" class="flex items-center justify-center w-20 h-[150px] flex-shrink-0">
-            <button class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]">
+          <div
+            v-if="showMoreMyRecipes"
+            class="flex items-center justify-center w-20 h-[150px] flex-shrink-0"
+          >
+            <button
+              class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]"
+            >
               <i class="pi pi-arrow-right text-xl text-gray-600"></i>
             </button>
           </div>
         </div>
       </div>
-      
+
       <!-- Database Recipes Section -->
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-4">
@@ -151,20 +172,24 @@ onMounted(async () => {
         <div v-if="isLoading" class="flex items-center justify-center h-[150px]">
           <PulseLoader :loading="isLoading" color="#4f46e5" size="15" />
         </div>
-        
-        <div class="flex flex-nowrap gap-4 overflow-x-auto pb-2 w-full scroll-smooth touch-pan-x scrollbar-hide">
+
+        <div
+          class="flex flex-nowrap gap-4 overflow-x-auto pb-2 w-full scroll-smooth touch-pan-x scrollbar-hide"
+        >
           <!-- Recipe Cards (when available) -->
           <RecipeCard
-            v-for="recipe in visibleDatabaseRecipes"
+            v-for="recipe in databaseRecipes"
             :key="recipe.id"
             :title="recipe.title"
             :image="recipe.image"
             class="flex-none w-[200px] h-[150px]"
           />
-          
+
           <!-- Show More Button (only if more than 6 recipes) -->
           <div class="flex items-center justify-center w-20 h-[150px] flex-shrink-0">
-            <button class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]">
+            <button
+              class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]"
+            >
               <i class="pi pi-search text-xl text-gray-600"></i>
             </button>
           </div>
@@ -173,4 +198,3 @@ onMounted(async () => {
     </div>
   </div>
 </template>
-
