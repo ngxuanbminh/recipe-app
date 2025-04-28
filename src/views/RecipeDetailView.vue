@@ -168,13 +168,13 @@ function addToGroceries() {
       <div class="p-4 flex items-center gap-3 justify-left">
         <!-- Servings -->
         <div class="flex items-center bg-[var(--color-secondary)] px-[10px] py-[5px] rounded-lg border border-[var(--color-tertiary)]">
-          <i class="pi pi-users text-lg mr-2"></i>
+          <i class="pi pi-users mr-2"></i>
           <span class="label-large">{{ recipe.servings }} </span>
         </div>
         
         <!-- Ready time -->
         <div class="flex items-center bg-[var(--color-secondary)] px-[10px] py-[5px] rounded-lg border border-[var(--color-tertiary)]">
-          <i class="pi pi-clock text-lg mr-2"></i>
+          <i class="pi pi-clock mr-2"></i>
           <span class="label-large">{{ recipe.readyInMinutes }} mins</span>
         </div>
         
@@ -183,10 +183,11 @@ function addToGroceries() {
           @click="toggleMeasurementSystem" 
           class="flex items-center bg-[var(--color-tertiary)] px-[10px] py-[5px] rounded-lg cursor-pointer"
         >
-          <i class="pi pi-sliders-h text-lg mr-2"></i>
+          <i class="pi pi-sliders-h mr-2"></i>
           <span class="label-large"> {{ measurementSystem === 'metric' ? 'Metric' : 'US' }}</span>
         </button>
         <button class="flex items-center bg-[var(--color-tertiary)] px-[10px] py-[5px] rounded-lg cursor-pointer">
+          <i class="pi pi-percentage mr-2"></i>
           <span class="label-large"> Scale</span>
         </button>
       </div>
