@@ -83,7 +83,8 @@ async function fetchDatabaseRecipes() {
   databaseError.value = null
   
   try {
-    const response = await axios.get('api/recipes/random', {
+    // Use relative path to leverage Vite's proxy configuration
+    const response = await axios.get('/api/recipes/random', {
       params: {
         apiKey: import.meta.env.VITE_SPOONACULAR_API_KEY,
         number: 6,
@@ -111,7 +112,7 @@ onMounted(() => {
   <div class="recipe-view bg-[var(--color-primary)] h-full w-full overflow-y-auto">
     <!-- Content container with padding -->
     <div class="py-6 pl-6">
-      <!-- Database Recipes Section (moved to top) -->
+      <!-- Database Recipes Section -->
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-4">
           <i class="pi pi-database text-xl"></i>
@@ -133,15 +134,18 @@ onMounted(() => {
           class="flex flex-nowrap gap-4 overflow-x-auto pb-2 w-full scroll-smooth touch-pan-x scrollbar-hide"
         >
           <!-- Recipe Cards (when available) -->
+          
           <RecipeCard
             v-for="recipe in databaseRecipes"
             :key="recipe.id"
             :title="recipe.title"
             :image="recipe.image"
+            :id="recipe.id"
             class="flex-none w-[200px] h-[150px]"
           />
+          
 
-          <!-- Show More Button (only if more than 6 recipes) -->
+          <!-- Search more recipes from database -->
           <div class="flex items-center justify-center w-20 h-[150px] flex-shrink-0">
             <button
               class="w-12 h-12 rounded-full bg-[#f3effb] flex items-center justify-center hover:bg-[#e8def8]"
@@ -152,7 +156,7 @@ onMounted(() => {
         </div>
       </div>
 
-      <!-- My Recipes Section (moved to middle) -->
+      <!-- My Recipes Section -->
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-4">
           <i class="pi pi-user text-xl"></i>
@@ -179,6 +183,7 @@ onMounted(() => {
             :key="recipe.id"
             :title="recipe.title"
             :image="recipe.image"
+            :id="recipe.id"
             class="flex-none w-[200px] h-[150px]"
           />
 
@@ -203,7 +208,7 @@ onMounted(() => {
         </div>
       </div>
       
-      <!-- Favorite Recipes Section (moved to bottom) -->
+      <!-- Favorite Recipes Section-->
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-4">
           <i class="pi pi-star text-xl"></i>
@@ -230,6 +235,7 @@ onMounted(() => {
             :key="recipe.id"
             :title="recipe.title"
             :image="recipe.image"
+            :id="recipe.id"
             class="flex-none w-[200px] h-[150px]"
           />
 

@@ -38,12 +38,11 @@ const activeStateClasses = computed(() => {
     @click="$emit('click', $event)"
     :class="[
       // base layout
-      'inline-flex items-center select-none transition-colors duration-150 outline-none',
+      'inline-flex items-center select-none transition-colors duration-150 outline-none cursor-pointer',
       // alignment - center in truncated mode, left-aligned otherwise
       truncated ? 'justify-center' : 'justify-start gap-2',
       // sizing
       truncated ? 'w-12 h-12 p-2' : 'h-12 px-6 py-3 w-full',
-      // rounded corners
       'rounded-lg',
       // state classes using CSS variables
       activeStateClasses,

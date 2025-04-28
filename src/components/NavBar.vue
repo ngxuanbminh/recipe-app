@@ -40,7 +40,7 @@ const activeItem = computed(() => {
 
 <template>
   <aside 
-    class="flex flex-none flex-col bg-[var(--color-primary)] h-full border-r border-[var(--color-tertiary)] transition-all duration-300 linear overflow-hidden px-3" 
+    class="flex flex-none flex-col bg-[var(--color-primary)] h-full border-r border-[var(--color-tertiary)] transition-all duration-300 linear overflow-hidden p-2" 
     :class="truncated ? 'w-[72px]' : 'w-[225px]'"
   >
     <!-- NavBar Header -->
