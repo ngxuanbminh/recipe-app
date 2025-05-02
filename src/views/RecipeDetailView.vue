@@ -205,6 +205,7 @@ function addToGroceries() {
           
           <div class="flex space-x-2">
             <IconButtonRound icon="heart" />
+            <IconButtonRound @click="addToGroceries" icon="shopping-cart" />
             <IconButtonRound icon="ellipsis-v" />
           </div>
         </div>
@@ -313,17 +314,6 @@ function addToGroceries() {
             </template>
           </ol>
         </div>
-      </div>
-      
-      <!-- Add to groceries button (fixed at bottom) -->
-      <div class="fixed bottom-0 left-0 right-0 bg-white p-4 shadow-lg flex justify-center">
-        <button 
-          @click="addToGroceries" 
-          class="w-full max-w-md py-3 bg-[var(--color-secondary)] rounded-full font-medium flex items-center justify-center gap-2"
-        >
-          <i class="pi pi-shopping-cart"></i>
-          <span>Add to groceries</span>
-        </button>
       </div>
     </div>
   </div>
