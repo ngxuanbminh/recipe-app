@@ -1,5 +1,6 @@
 <script setup>
 import IconButton from './IconButton.vue';
+import SpoonacularUserStatus from './SpoonacularUserStatus.vue';
 import { useAuth0 } from '@auth0/auth0-vue';
 
 const { loginWithRedirect, logout, user, isAuthenticated } = useAuth0();
@@ -58,6 +59,11 @@ defineEmits(['close']);
           </div>
           <button class="block w-full py-2 px-4 mb-2 bg-gray-200 text-black border-none rounded cursor-pointer text-sm hover:bg-gray-300" @click="handleLogout">Log out</button>
         </div>
+      </div>
+      
+      <!-- Spoonacular Connection Section - only shown when authenticated -->
+      <div v-if="isAuthenticated" class="p-4 border-b border-gray-200">
+        <SpoonacularUserStatus />
       </div>
       
       <div class="p-4 border-b border-gray-200">

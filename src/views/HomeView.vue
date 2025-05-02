@@ -1,9 +1,12 @@
 <script setup>
 import { useAuth0 } from '@auth0/auth0-vue';
 import { useRouter } from 'vue-router';
+import { onMounted, watch } from 'vue';
+import { useSpoonacularStore } from '../stores/spoonacular';
 
 const { loginWithRedirect, user, isAuthenticated, isLoading } = useAuth0();
 const router = useRouter();
+const spoonacularStore = useSpoonacularStore();
 
 const handleLogin = () => {
   loginWithRedirect();
@@ -20,6 +23,18 @@ const handleSignUp = () => {
 const navigateTo = (route) => {
   router.push(route);
 };
+
+// Connect Auth0 user to Spoonacular when authenticated
+watch(() => isAuthenticated.value && user.value, (isUserAuthenticated) => {
+  if (isUserAuthenticated && !spoonacularStore.isConnected) {
+    spoonacularStore.connectSpoonacularUser(user.value);
+  }
+}, { immediate: true });
+
+// Attempt to restore previous Spoonacular connection
+onMounted(() => {
+  spoonacularStore.restoreConnection();
+});
 </script>
 
 <template>
