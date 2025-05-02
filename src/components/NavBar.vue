@@ -4,6 +4,7 @@ import { RouterLink, useRoute } from 'vue-router';
 import IconButton from './IconButton.vue';
 import NavItem from './NavItem.vue';
 import SettingsPopup from './SettingsPopup.vue';
+import { useAuth0 } from '@auth0/auth0-vue';
 
 defineProps({
   /** Whether the navbar is in truncated mode */
@@ -20,6 +21,9 @@ const route = useRoute();
 
 // State to control the visibility of the settings popup
 const showSettingsPopup = ref(false);
+
+// Get auth state
+const { user, isAuthenticated } = useAuth0();
 
 // Toggle settings popup visibility
 const toggleSettingsPopup = () => {
@@ -117,8 +121,26 @@ const activeItem = computed(() => {
 
     <!-- NavBar Footer -->
     <div :class="[
-      'flex items-center justify-start py-3 transition-all duration-300 w-full',
+      'flex items-center justify-center py-3 transition-all duration-300 w-full',
     ]">
+      <!-- User Profile/Login -->
+      <div v-if="!truncated && isAuthenticated" class="flex items-center ml-2">
+        <img 
+          v-if="user?.picture" 
+          :src="user.picture" 
+          alt="Profile" 
+          class="w-8 h-8 rounded-full mr-2"
+        />
+        <span v-else class="w-8 h-8 rounded-full bg-gray-300 flex items-center justify-center mr-2">
+          {{ user?.name?.[0]?.toUpperCase() || 'U' }}
+        </span>
+        <span class="text-xs text-white truncate max-w-[90px]">{{ user?.name || 'User' }}</span>
+      </div>
+      <div v-else-if="!truncated" class="ml-2">
+        <span class="text-xs text-white">Not logged in</span>
+      </div>
+      
+      <!-- Settings Icon -->
       <IconButton icon="cog" @click="toggleSettingsPopup" />
     </div>
   </aside>
