@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import { useRoute } from 'vue-router';
 import { useToast } from 'vue-toastification';
 import PulseLoader from 'vue-spinner/src/PulseLoader.vue';
@@ -15,6 +15,12 @@ const loading = ref(true);
 const error = ref(null);
 const toast = useToast();
 const measurementSystem = ref('metric'); // Default to metric system
+
+// Scaling functionality
+const showScaleSlider = ref(false);
+const scaleFactor = ref(1); // Default scale factor is 1x (unchanged)
+const originalServings = ref(0); // Store original servings count
+const appliedScaleFactor = ref(1); // Store the confirmed scale factor
 
 onMounted(async () => {
   loading.value = true;
@@ -33,6 +39,7 @@ onMounted(async () => {
       
       if (foundRecipe) {
         recipe.value = foundRecipe;
+        originalServings.value = foundRecipe.servings; // Store original servings
         loading.value = false;
         return;
       } else {
@@ -55,6 +62,7 @@ onMounted(async () => {
       if (foundRecipe) {
         // console.log('Recipe detail - Found recipe in Favorite Recipes:', foundRecipe);
         recipe.value = foundRecipe;
+        originalServings.value = foundRecipe.servings; // Store original servings
         loading.value = false;
         return;
       } else {
@@ -75,6 +83,7 @@ onMounted(async () => {
         }
       });
       recipe.value = response.data;
+      originalServings.value = response.data.servings; // Store original servings
       loading.value = false;
     } catch (apiError) {
       console.error("Error fetching from Spoonacular API:", apiError);
@@ -93,27 +102,69 @@ function toggleMeasurementSystem() {
   measurementSystem.value = measurementSystem.value === 'metric' ? 'us' : 'metric';
 }
 
-// Get the correct measurement for an ingredient based on the current system
+// Toggle scale slider visibility
+function toggleScaleSlider() {
+  showScaleSlider.value = !showScaleSlider.value;
+}
+
+// Reset scale to original (1x)
+function resetScale() {
+  scaleFactor.value = 1;
+}
+
+// Apply the current scale and hide the slider
+function applyScale() {
+  appliedScaleFactor.value = scaleFactor.value;
+  toast.success(`Recipe scaled to ${formatScaleFactor(scaleFactor.value)}`, {
+    timeout: 2000,
+  });
+  showScaleSlider.value = false;
+}
+
+// Computed value for scaled servings
+const scaledServings = computed(() => {
+  if (!recipe.value || !originalServings.value) return 0;
+  return Math.round((originalServings.value * scaleFactor.value) * 100) / 100;
+});
+
+// Update scale factor when slider changes
+function updateScaleFactor(event) {
+  scaleFactor.value = parseFloat(event.target.value);
+}
+
+// Format scale factor to 2 decimal places for display
+function formatScaleFactor(value) {
+  return `x${parseFloat(value).toFixed(2)}`;
+}
+
+// Get the correct measurement for an ingredient based on the current system and scale factor
 function getIngredientMeasure(ingredient) {
+  let measureData;
+  
   if (!ingredient.measures) {
-    return {
+    measureData = {
       amount: ingredient.amount,
       unit: ingredient.unit
     };
+  } else {
+    const measure = ingredient.measures[measurementSystem.value];
+    if (!measure) {
+      measureData = {
+        amount: ingredient.amount,
+        unit: ingredient.unit
+      };
+    } else {
+      measureData = {
+        amount: measure.amount,
+        unit: measure.unitShort || measure.unitLong || ''
+      };
+    }
   }
   
-  const measure = ingredient.measures[measurementSystem.value];
-  if (!measure) {
-    return {
-      amount: ingredient.amount,
-      unit: ingredient.unit
-    };
-  }
+  // Apply scaling factor to the amount
+  measureData.amount = parseFloat((measureData.amount * scaleFactor.value).toFixed(2));
   
-  return {
-    amount: measure.amount,
-    unit: measure.unitShort || measure.unitLong || ''
-  };
+  return measureData;
 }
 
 function addToGroceries() {
@@ -169,7 +220,7 @@ function addToGroceries() {
         <!-- Servings -->
         <div class="flex items-center bg-[var(--color-secondary)] px-[10px] py-[5px] rounded-lg border border-[var(--color-tertiary)]">
           <i class="pi pi-users mr-2"></i>
-          <span class="label-large">{{ recipe.servings }} </span>
+          <span class="label-large">{{ scaledServings }} </span>
         </div>
         
         <!-- Ready time -->
@@ -186,10 +237,45 @@ function addToGroceries() {
           <i class="pi pi-sliders-h mr-2"></i>
           <span class="label-large"> {{ measurementSystem === 'metric' ? 'Metric' : 'US' }}</span>
         </button>
-        <button class="flex items-center bg-[var(--color-tertiary)] px-[10px] py-[5px] rounded-lg cursor-pointer">
+        <button 
+          @click="toggleScaleSlider" 
+          class="flex items-center bg-[var(--color-tertiary)] px-[10px] py-[5px] rounded-lg cursor-pointer"
+        >
           <i class="pi pi-percentage mr-2"></i>
-          <span class="label-large"> Scale</span>
+          <span class="label-large"> Scale (x{{ appliedScaleFactor }}) </span>
         </button>
+      </div>
+      
+      <!-- Scale slider -->
+      <div v-if="showScaleSlider" class="p-4 bg-[var(--color-secondary)] mx-4 rounded-lg">
+        <div class="flex items-center justify-between mb-2">
+          <span class="text-sm">x0.25</span>
+          <span class="font-medium">{{ formatScaleFactor(scaleFactor) }}</span>
+          <span class="text-sm">x10</span>
+        </div>
+        <input 
+          type="range" 
+          min="0.25" 
+          max="10" 
+          step="0.25" 
+          v-model="scaleFactor" 
+          @input="updateScaleFactor"
+          class="w-full accent-[var(--color-tertiary)] h-2 rounded-lg appearance-none cursor-pointer bg-gray-300"
+        />
+        <div class="flex justify-end mt-3 gap-2">
+          <button 
+            @click="resetScale" 
+            class="px-3 py-1 border border-[var(--color-tertiary)] text-black rounded-md text-sm cursor-pointer"
+          >
+            Reset
+          </button>
+          <button 
+            @click="applyScale" 
+            class="px-3 py-1 bg-[var(--color-tertiary)] text-black rounded-md text-sm cursor-pointer"
+          >
+            Apply
+          </button>
+        </div>
       </div>
       
       <!-- Recipe content in two columns -->
@@ -242,6 +328,5 @@ function addToGroceries() {
     </div>
   </div>
 </template>
-
 
 
