@@ -1,5 +1,6 @@
-import { defineStore } from 'pinia';
-import { connectUser } from '../services/spoonacularApi';
+import { defineStore } from 'pinia'
+import { connectUser } from '../services/spoonacularApi'
+import { updateUserMetadata, getUserMetadata } from '../services/auth0Service'
 
 export const useSpoonacularStore = defineStore('spoonacular', {
   state: () => ({
@@ -10,62 +11,98 @@ export const useSpoonacularStore = defineStore('spoonacular', {
     isConnecting: false,
     error: null,
   }),
-  
+
   actions: {
-    async connectSpoonacularUser(authUser) {
-      if (!authUser || this.isConnecting) return;
-      
-      this.isConnecting = true;
-      this.error = null;
-      
+    async connectSpoonacularUser(authUser, getAccessTokenSilently) {
+      if (!authUser || this.isConnecting) return
+
+      this.isConnecting = true
+      this.error = null
+
       try {
         // Connect the Auth0 user to Spoonacular
-        const connectResponse = await connectUser(authUser);
-        
-        if (connectResponse && connectResponse.username && connectResponse.spoonacularPassword && connectResponse.hash) {
-          this.spoonacularHash = connectResponse.hash;
-          this.spoonacularPassword = connectResponse.spoonacularPassword;
-          this.spoonacularUser = connectResponse;
-          this.isConnected = true;
-          
-          // Store user connection data in localStorage for persistence
-          localStorage.setItem('spoonacularUser', JSON.stringify(this.spoonacularUser));
-          localStorage.setItem('spoonacularHash', this.spoonacularHash);
-          localStorage.setItem('spoonacularPassword', this.spoonacularPassword);
+        const connectResponse = await connectUser(authUser)
+
+        if (
+          connectResponse &&
+          connectResponse.username &&
+          connectResponse.spoonacularPassword &&
+          connectResponse.hash
+        ) {
+          this.spoonacularHash = connectResponse.hash
+          this.spoonacularPassword = connectResponse.spoonacularPassword
+          this.spoonacularUser = connectResponse.username
+          this.isConnected = true
+
+          // Store user connection data in Auth0 user metadata
+          const spoonacularMetadata = {
+            spoonacularUser: this.spoonacularUser,
+            spoonacularHash: this.spoonacularHash,
+            spoonacularPassword: this.spoonacularPassword,
+          }
+
+          try {
+            // Update the user's metadata using Auth0 Management API
+            await updateUserMetadata({
+              user: authUser,
+              metadata: { spoonacular: spoonacularMetadata },
+              getAccessTokenSilently,
+            })
+          } catch (metadataError) {
+            console.error(
+              'Failed to update Auth0 metadata, but user is still connected to Spoonacular:',
+              metadataError,
+            )
+          }
         }
       } catch (error) {
-        this.error = error.message || 'Failed to connect to Spoonacular';
-        console.error('Error connecting to Spoonacular:', error);
+        this.error = error.message || 'Failed to connect to Spoonacular'
+        console.error('Error connecting to Spoonacular:', error)
       } finally {
-        this.isConnecting = false;
+        this.isConnecting = false
       }
     },
-    
-    restoreConnection() {
+
+    async restoreConnection(authUser) {
       try {
-        const savedUser = localStorage.getItem('spoonacularUser');
-        const savedHash = localStorage.getItem('spoonacularHash');
-        const savedPassword = localStorage.getItem('spoonacularPassword');
-        
-        if (savedUser && savedHash && savedPassword) {
-          this.spoonacularUser = JSON.parse(savedUser);
-          this.spoonacularHash = savedHash;
-          this.spoonacularPassword = savedPassword;
-          this.isConnected = true;
+        if (!authUser) return
+
+        // Get metadata directly from the user object
+        const spoonacularMetadata = getUserMetadata(authUser, 'spoonacular')
+
+        if (spoonacularMetadata) {
+          const { spoonacularUser, spoonacularHash, spoonacularPassword } = spoonacularMetadata
+
+          if (spoonacularUser && spoonacularHash && spoonacularPassword) {
+            this.spoonacularUser = spoonacularUser
+            this.spoonacularHash = spoonacularHash
+            this.spoonacularPassword = spoonacularPassword
+            this.isConnected = true
+          }
         }
       } catch (error) {
-        console.error('Error restoring Spoonacular connection:', error);
+        console.error('Error restoring Spoonacular connection:', error)
       }
     },
-    
-    clearConnection() {
-      this.spoonacularUser = null;
-      this.spoonacularHash = null;
-      this.spoonacularPassword = null;
-      this.isConnected = false;
-      localStorage.removeItem('spoonacularUser');
-      localStorage.removeItem('spoonacularHash');
-      localStorage.removeItem('spoonacularPassword');
-    }
-  }
-});
+
+    async clearConnection(authUser, getAccessTokenSilently) {
+      this.spoonacularUser = null
+      this.spoonacularHash = null
+      this.spoonacularPassword = null
+      this.isConnected = false
+
+      if (authUser && getAccessTokenSilently) {
+        try {
+          // Clear the spoonacular metadata from Auth0
+          await updateUserMetadata({
+            user: authUser,
+            metadata: { spoonacular: null },
+            getAccessTokenSilently,
+          })
+        } catch (error) {
+          console.error('Error clearing Auth0 user metadata:', error)
+        }
+      }
+    },
+  },
+})
